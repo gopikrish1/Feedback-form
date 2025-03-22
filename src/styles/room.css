@@ -1,0 +1,98 @@
+.container {
+    display: flex;
+    flex-direction: column;
+    align-items: center; /* Centers content horizontally */
+    justify-content: center; /* Centers content vertically */
+    min-height: 100vh; /* Makes sure it takes full height */
+
+    margin: auto;
+    
+    
+    width: 4000px;
+    height: 900px;
+    max-width: 1500px; /* Limits max width for better readability */
+    max-height: 1800px;
+    padding: 20px;
+}
+
+.room-content {
+    width: 100%;
+    background: white;
+    padding: 20px;
+    border-radius: 10px;
+    
+    text-align: center;
+    display: flex;
+    flex-direction: column;
+    align-items: center; /* Centers content horizontally */
+    justify-content: center; /* Centers content vertically */
+    border-radius: 7px;
+}
+
+/* Making selective elements smaller */
+.room-content h2,  /* Room title */
+.room-content h3,  /* "Give Feedback" */
+.room-content p,   /* Username message */
+.room-content .form-label,  /* Rating text */
+.room-content input[type="text"] { /* Feedback input */
+    font-size: 30px; /* Smaller text */
+    font-size: 2rem;
+    margin-bottom: 20px;
+    color: #3f2c2c; /* White text for better contrast */
+
+}
+
+/* Reduce the spacing for compact look */
+.room-content input[type="text"] {
+    height: 30px;
+    font-size: 20px;
+    padding: 5px;
+}
+
+
+.room-content input[type="range"] {
+    width: 450px;   /* Reduce width */
+    height: 4px;    /* Reduce thickness */
+    margin: 5px auto;  /* Centering */
+    display: block;
+}
+
+/* Customize slider thumb */
+.room-content input[type="range"]::-webkit-slider-thumb {
+    width: 12px;  /* Smaller thumb */
+    height: 12px;
+    background: #007bff;  /* Blue thumb */
+    border-radius: 50%;
+    cursor: pointer;
+}
+
+/* Set width for the feedback input field */
+.room-content input[type="text"] {
+    width: 450px;  /* Increase width */
+    max-width: 100%;
+    padding: 8px;
+    border: 1px solid #ccc;
+    border-radius: 5px;
+}
+
+.custom-width {
+    width: 450px;
+  }
+
+/* Set width for the submit feedback button */
+.room-content button {
+    width: 50px;  /* Increase width */
+    max-width: 100%;
+    padding: 10px;
+    background: #3f2c2c; /* Bootstrap primary color */
+    color: white;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    transition: 0.3s;
+}
+
+/* Button hover effect */
+.room-content button:hover {
+    background: #3f2c2c;
+}

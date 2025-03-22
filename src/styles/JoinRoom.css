@@ -1,0 +1,105 @@
+/* Fullscreen background layout */
+.fullscreen-center {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 100vh;  /* Full viewport height */
+    width: 100vw;   /* Full viewport width */
+    background: url('https://www.transparenttextures.com/patterns/white-floral.png'), 
+                linear-gradient(135deg, #fbc2eb, #a6c1ee);
+    background-size: cover;
+    background-position: center;
+    background-repeat: no-repeat;
+    padding: 20px;
+    box-sizing: border-box;
+}
+
+/* Join room container - Centered Box */
+.join-room-container {
+    background: rgba(255, 255, 255, 0.95);
+    padding: 40px;
+    border-radius: 15px;
+    box-shadow: 6px 6px 20px rgba(0, 0, 0, 0.2);
+    text-align: center;
+    max-width: 500px;
+    width: 100%;
+    transition: all 0.3s ease-in-out;
+}
+
+/* Heading */
+.join-room-container h2 {
+    font-weight: bold;
+    margin-bottom: 20px;
+    color: #333;
+    font-size: 24px;
+}
+
+/* Subtext */
+.room-text {
+    font-size: 16px;
+    color: #666;
+    margin-bottom: 20px;
+}
+
+/* Input field */
+.input-box {
+    padding: 14px;
+    font-size: 18px;
+    border-radius: 8px;
+    border: 2px solid #ced4da;
+    width: 100%;
+    text-align: center;
+    transition: border-color 0.3s ease-in-out, box-shadow 0.3s ease-in-out;
+}
+
+.input-box:focus {
+    border-color: #f78fb3;
+    outline: none;
+    box-shadow: 0 0 10px rgba(247, 143, 179, 0.6);
+}
+
+/* Button */
+.btn-join {
+    width: 100%;
+    padding: 16px;
+    font-size: 18px;
+    border-radius: 8px;
+    background-color: #f78fb3;
+    color: white;
+    border: none;
+    font-weight: bold;
+    cursor: pointer;
+    transition: 0.3s ease-in-out;
+}
+
+.btn-join:hover {
+    background-color: #f45b69;
+    transform: scale(1.07);
+}
+
+/* Responsive Design for Small Screens */
+@media (max-width: 768px) {
+    .join-room-container {
+        width: 90%;
+        padding: 30px;
+    }
+    .input-box {
+        font-size: 16px;
+        padding: 12px;
+    }
+    .btn-join {
+        font-size: 16px;
+        padding: 14px;
+    }
+}
+
+/* Extra Small Screens */
+@media (max-width: 480px) {
+    .fullscreen-center {
+        padding: 10px;
+    }
+    .join-room-container {
+        width: 95%;
+        padding: 25px;
+    }
+}
