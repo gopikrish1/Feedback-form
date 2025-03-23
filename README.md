@@ -79,7 +79,7 @@ The **Smart Feedback System** is a real-time platform designed to collect and an
 
 ![Image 1](https://raw.githubusercontent.com/gopikrish1/Feedback-form/main/images/image1.png)
 ![Image 2](https://raw.githubusercontent.com/gopikrish1/Feedback-form/main/images/image2.png)
-![Image 3](https://raw.githubusercontent.com/gopikrish1/Feedback-form/main/images/image3.png)
+![Image 3](https://raw.githubusercontent.com/gopikrish1/Feedback-form/main/images/Image3.png)
 
 
 ## **Conclusion**
