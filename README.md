@@ -1,8 +1,8 @@
-# **Smart Feedback System for Events**
+# **Realtime Feedback System for Events**
 
 ## **Project Overview**
 
-The **Smart Feedback System** is a real-time platform designed to collect and analyze feedback from event attendees. It allows participants to submit their thoughts quickly and anonymously during or after an event. This solution provides event organizers with instant insights to improve the event experience, making it more interactive and engaging for everyone involved.
+The **Realtime Feedback System** is a real-time platform designed to collect and analyze feedback from event attendees. It allows participants to submit their thoughts quickly and anonymously during or after an event. This solution provides event organizers with instant insights to improve the event experience, making it more interactive and engaging for everyone involved.
 
 ## **Key Features**
 
