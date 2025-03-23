@@ -76,6 +76,11 @@ The **Smart Feedback System** is a real-time platform designed to collect and an
 
 5. **Access the platform in your browser** at `http://localhost:3000`.
 
+
+![Image 1 Description](images/image1.png)
+![Image 2 Description](images/image2.png)
+![Image 3 Description](images/image3.png)
+
 ## **Conclusion**
 
 This **Smart Feedback System** aims to make event feedback easier, faster, and more impactful for both organizers and attendees. By gathering insights in real-time, event organizers can act on feedback immediately, improving the overall experience for everyone.
