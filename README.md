@@ -77,9 +77,10 @@ The **Smart Feedback System** is a real-time platform designed to collect and an
 5. **Access the platform in your browser** at `http://localhost:3000`.
 
 
-![Image 1 Description](images/image1.png)
-![Image 2 Description](images/image2.png)
-![Image 3 Description](images/image3.png)
+![Image 1](https://raw.githubusercontent.com/gopikrish1/Feedback-form/main/images/image1.png)
+![Image 2](https://raw.githubusercontent.com/gopikrish1/Feedback-form/main/images/image2.png)
+![Image 3](https://raw.githubusercontent.com/gopikrish1/Feedback-form/main/images/image3.png)
+
 
 ## **Conclusion**
 
