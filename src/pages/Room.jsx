@@ -1,33 +1,22 @@
 import { useState, useEffect } from "react";
 import { useParams } from "react-router-dom";
 import { db } from "../firebase";
-import { collection, query, where, onSnapshot, addDoc, serverTimestamp, updateDoc, doc, increment } from "firebase/firestore";
+import {
+  collection, query, where, onSnapshot, addDoc, serverTimestamp,
+  updateDoc, doc, increment, setDoc
+} from "firebase/firestore";
 import "bootstrap/dist/css/bootstrap.min.css";
 import { Pie } from "react-chartjs-2";
 import { Chart as ChartJS, Title, Tooltip, Legend, ArcElement, CategoryScale } from "chart.js";
 import "../styles/room.css";
 
-// Registering Chart.js components
+// Register Chart.js components
 ChartJS.register(Title, Tooltip, Legend, ArcElement, CategoryScale);
 
 // Generate a random username
 const generateUsername = () => {
-  const adjectives = [
-    "Rare", "Lateral", "Curious", "Gentle", "Majestic", "Vibrant", "Mystic", "Silent",
-    "Eccentric", "Mighty", "Bold", "Luminous", "Swift", "Dazzling", "Fierce", "Brave",
-    "Clever", "Enigmatic", "Adventurous", "Dynamic", "Playful", "Intrepid", "Serene",
-    "Whimsical", "Radiant", "Noble", "Graceful", "Mysterious", "Energetic", "Harmonious",
-    "Serene", "Gleaming", "Vivid", "Majestic", "Steady", "Timid", "Hasty", "Shining",
-    "Vast", "Agile", "Ethereal", "Graceful"
-  ];
-
-  const nouns = [
-    "Rabbit", "Moon", "Tiger", "Eagle", "Lion", "Whale", "Phoenix", "Wolf", "Dragon",
-    "Panther", "Leopard", "Jaguar", "Falcon", "Shark", "Bear", "Butterfly", "Kangaroo",
-    "Elephant", "Hawk", "Owl", "Cheetah", "Zebra", "Giraffe", "Horse", "Panda", "Peacock",
-    "Penguin", "Koala", "Cobra", "Vulture", "Alligator", "Otter", "Dolphin", "Swan",
-    "Raven", "Turtle", "Falcon", "Coyote", "Bison", "Gorilla", "Rhino", "Buffalo"
-  ];
+  const adjectives = ["Rare", "Curious", "Bold", "Swift", "Radiant"];
+  const nouns = ["Tiger", "Eagle", "Whale", "Phoenix", "Wolf"];
   return `${adjectives[Math.floor(Math.random() * adjectives.length)]} ${nouns[Math.floor(Math.random() * nouns.length)]}`;
 };
 
@@ -43,41 +32,52 @@ const Room = () => {
   useEffect(() => {
     if (!roomId) return;
 
-    // Check if the user is the room creator
-    const storedCreator = localStorage.getItem("roomCreator");
-    setIsCreator(storedCreator === roomId);
+    setIsCreator(localStorage.getItem("roomCreator") === roomId);
 
-    // Fetch feedbacks for the room
     const feedbacksRef = collection(db, "feedbacks");
     const feedbackQuery = query(feedbacksRef, where("roomId", "==", roomId));
     const unsubscribeFeedbacks = onSnapshot(feedbackQuery, (snapshot) => {
       setFeedbacks(snapshot.docs.map((doc) => ({ id: doc.id, ...doc.data() })));
     });
 
-    // Listen to the active users in the room
-    const activeUsersRef = doc(db, "rooms", roomId);
-    const unsubscribeActiveUsers = onSnapshot(activeUsersRef, (doc) => {
-      setActiveUsers(doc.data()?.activeUsers || 0);  // Fetch the active user count from Firestore
+    const roomRef = doc(db, "rooms", roomId);
+
+    // Increment active users safely
+    const incrementActiveUserCount = async () => {
+      try {
+        await updateDoc(roomRef, { activeUsers: increment(1) });
+      } catch (error) {
+        console.error("Error incrementing active user count:", error);
+        await setDoc(roomRef, { activeUsers: 1 }, { merge: true }); // Ensure room exists
+      }
+    };
+
+    // Decrement active users safely
+    const decrementActiveUserCount = async () => {
+      try {
+        await updateDoc(roomRef, { activeUsers: increment(-1) });
+      } catch (error) {
+        console.error("Error decrementing active user count:", error);
+      }
+    };
+
+    // Subscribe to active user count updates
+    const unsubscribeActiveUsers = onSnapshot(roomRef, (doc) => {
+      setActiveUsers(doc.data()?.activeUsers || 0);
     });
 
-    // Increment active users when the user enters the room
-    const incrementActiveUserCount = async () => {
-      await updateDoc(activeUsersRef, {
-        activeUsers: increment(1),
-      });
-    };
+    // Increment active users on mount
     incrementActiveUserCount();
 
-    return () => {
-      // Decrement active users when the user leaves the room
-      const decrementActiveUserCount = async () => {
-        await updateDoc(activeUsersRef, {
-          activeUsers: increment(-1),
-        });
-      };
+    // Handle tab close or refresh
+    const handleUnload = () => {
       decrementActiveUserCount();
+    };
+    window.addEventListener("beforeunload", handleUnload);
 
-      // Cleanup on unmount
+    return () => {
+      decrementActiveUserCount();
+      window.removeEventListener("beforeunload", handleUnload );
       unsubscribeFeedbacks();
       unsubscribeActiveUsers();
     };
@@ -106,7 +106,6 @@ const Room = () => {
 
   const getRatingDistribution = () => {
     const ratingCounts = [0, 0, 0, 0, 0];
-
     feedbacks.forEach((fb) => {
       if (fb.rating >= 1 && fb.rating <= 5) {
         ratingCounts[fb.rating - 1]++;
@@ -115,106 +114,61 @@ const Room = () => {
 
     return {
       labels: ["1⭐", "2⭐", "3⭐", "4⭐", "5⭐"],
-      datasets: [
-        {
-          label: "Ratings Distribution",
-          data: ratingCounts,
-          backgroundColor: ["#ff4d4d", "#ffcc00", "#99cc33", "#3399ff", "#66cc66"],
-        },
-      ],
+      datasets: [{ data: ratingCounts, backgroundColor: ["#ff4d4d", "#ffcc00", "#99cc33", "#3399ff", "#66cc66"] }],
     };
   };
 
   const getSuggestions = () => {
     if (feedbacks.length === 0) return "No feedback yet.";
-    const averageRating =
-      feedbacks.reduce((sum, fb) => sum + fb.rating, 0) / feedbacks.length;
-
-    if (averageRating > 4) return "Great job! Keep up the good work! 😊";
-    if (averageRating > 3) return "Good work! A few improvements can make it even better. 👍";
+    const avgRating = feedbacks.reduce((sum, fb) => sum + fb.rating, 0) / feedbacks.length;
+    if (avgRating > 4) return "Great job! Keep up the good work! 😊";
+    if (avgRating > 3) return "Good work! A few improvements can make it even better. 👍";
     return "Consider addressing key issues to enhance user experience. 🚀";
   };
 
   return (
     <div className="container">
       <div className="room-content">
-        <h2 className="text-center">Room: {roomId}</h2>
+        <h2 className="text-center"><strong>Room:</strong> {roomId}</h2>
 
-        {/* Show Active Users if Creator */}
-        {isCreator && <p className="text-muted">👥 Active Users: {activeUsers}</p>}
+        {isCreator && <p className="text-muted"><strong>👥 Active Users:</strong> {activeUsers - 1 }</p>}
 
-        {/* Feedback Form */}
         {!isCreator && (
           <>
             <h3>Give Feedback</h3>
             <p className="text-muted">Hey <strong>{username}</strong>, your feedback matters! 😊</p>
             <label className="form-label">Rating: {rating} ⭐</label>
-            <input
-              type="range"
-              className="form-range"
-              min="1"
-              max="5"
-              step="1"
-              value={rating}
-              onChange={(e) => setRating(Number(e.target.value))}
-            />
-            <input
-              type="text"
-              className="form-control my-3"
-              value={comment}
-              onChange={(e) => setComment(e.target.value)}
-              placeholder="Your feedback"
-            />
-            <button className="btn btn-primary" style={{ width: "450px" }} onClick={submitFeedback}>
-              Submit Feedback
-            </button>
+            <input type="range" className="form-range" min="1" max="5" step="1" value={rating} onChange={(e) => setRating(Number(e.target.value))} />
+            <input type="text" className="form-control my-3" value={comment} onChange={(e) => setComment(e.target.value)} placeholder="Your feedback" />
+            <button className="btn btn-primary" style={{ width: "450px" }} onClick={submitFeedback}>Submit Feedback</button>
           </>
         )}
 
-        {/* Feedback Display */}
         {isCreator && (
           <>
-            <h3>Feedbacks from Users:</h3>
-            {feedbacks.length === 0 ? (
-              <p>No feedback yet.</p>
-            ) : (
-              <div className="table-container">
-                <table className="table table-hover table-bordered mt-3">
-                  <thead className="table-dark">
-                    <tr>
-                      <th>Username</th>
-                      <th>Rating</th>
-                      <th>Comment</th>
-                      <th>Timestamp</th>
+            <h4><strong>Feedbacks from Users:</strong></h4>
+            {feedbacks.length === 0 ? <p>No feedback yet.</p> : (
+              <table className="table table-hover table-bordered mt-3">
+                <thead className="table-dark">
+                  <tr><th>Username</th><th>Rating</th><th>Comment</th><th>Timestamp</th></tr>
+                </thead>
+                <tbody>
+                  {feedbacks.map((fb) => (
+                    <tr key={fb.id}>
+                      <td>{fb.username}</td>
+                      <td>{fb.rating}⭐</td>
+                      <td>{fb.comment}</td>
+                      <td>{fb.timestamp?.seconds ? new Date(fb.timestamp.seconds * 1000).toLocaleString() : "N/A"}</td>
                     </tr>
-                  </thead>
-                  <tbody>
-                    {feedbacks.map((fb) => (
-                      <tr key={fb.id}>
-                        <td>{fb.username}</td>
-                        <td>{fb.rating}⭐</td>
-                        <td>{fb.comment}</td>
-                        <td>
-                          {fb.timestamp?.seconds
-                            ? new Date(fb.timestamp.seconds * 1000).toLocaleString()
-                            : "N/A"}
-                        </td>
-                      </tr>
-                    ))}
-                  </tbody>
-                </table>
-              </div>
+                  ))}
+                </tbody>
+              </table>
             )}
 
-            <h4 className="mt-4">Feedback Rating Distribution:</h4>
-            <div className="chart-container">
-              <Pie data={getRatingDistribution()} />
-            </div>
-
-            <div className="mt-4">
-              <h5>Suggestions based on Feedback:</h5>
-              <p>{getSuggestions()}</p>
-            </div>
+            <h4 className="mt-4"><strong>Feedback Rating Distribution:</strong></h4>
+            <div className="chart-container"><Pie data={getRatingDistribution()} /></div>
+            <h4 className="mt-4"><strong>Suggestions:</strong></h4>
+            <p>{getSuggestions()}</p>
           </>
         )}
       </div>
